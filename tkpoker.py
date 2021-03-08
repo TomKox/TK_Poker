@@ -193,6 +193,48 @@ def get_flushcards(cards):
     else:
         return None
 
+def get_straightcards(cards):
+    straight = []
+    cards = list(cards)
+    ranks = get_by_rank(cards)
+    
+    uniques = []
+    for r in ranks:
+        uniques.append(ranks[r][0])
+    
+    if len(uniques) < 5:
+        return None
+
+    uniques.sort()
+
+    for card in uniques:
+        print(str(card) + ', ' + str(card.rank.value))
+
+    if cards[0].rank == Rank.ACE:
+        ace = True
+
+
+# returns a dictionary with Rank as Key, and a list of all cards of that Rank as Value
+def get_by_rank(cards):
+    cards = list(cards)
+    cards.sort()
+    ranks = dict()
+
+    # Create dictionary with all ranks as keys
+    for r in Rank:
+        ranks[r]=[]
+
+    # Add cards to the dictionary
+    for card in cards:
+        ranks[card.rank].append(card)
+
+    # Remove empty dictionary entries
+    for r in Rank:
+        if len(ranks[r]) == 0:
+            del ranks[r]
+
+    return ranks
+
 flush_not_found = True
 while flush_not_found:
     print('------------------------------------------')
@@ -218,4 +260,8 @@ while flush_not_found:
     if flush != None:
         flush_not_found = False
         for card in flush:
-            print(card)
+            # print(card)
+            pass
+
+    #get_by_rank(seven_cards)
+    get_straightcards(seven_cards)
