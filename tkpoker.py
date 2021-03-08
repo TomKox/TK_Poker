@@ -128,23 +128,32 @@ class Ranking(Enum):
     STRAIGHT_FLUSH = 9
     ROYAL_FLUSH = 10
 
+    # self == other
     def __eq__(self, other):
         return self.value == other.value
 
+    # self != other
     def __ne__(self, other):
         return self.value != other.value
 
+    # self < other
     def __lt__(self, other):
         return self.value < other.value
 
+    # self <= other
     def __le__(self, other):
         return self.value <= other.value
 
+    # self > other
     def __gt__(self, other):
         return self.value > other.value
 
+    # self >= other
     def __ge__(self, other):
         return self.value >= other.value
+
+    def __str__(self):
+        return self.name.replace('_',' ').title()
 
 
 class Holding:
@@ -156,215 +165,37 @@ class Holding:
 
         cards = self._cards
 
-        if check_royal_flush(cards):
-            self._ranking = Ranking.ROYAL_FLUSH
-
-        elif check_straight_flush(cards):
-            self._ranking = Ranking.STRAIGHT_FLUSH
-            flushcards = get_flushcards_from(cards)
-
-        elif check_four_of_a_kind(cards):
-            self._ranking = Ranking.FOUR_OF_A_KIND
-
-        elif check_full_house(cards):
-            self._ranking = Ranking.FULL_HOUSE
-
-        elif check_flush(cards):
-            self._ranking = Ranking.FLUSH
-
-        elif check_straight(cards):
-            self._ranking = Ranking.STRAIGHT
-
-        elif check_three_of_a_kind(cards):
-            self._ranking = Ranking.THREE_OF_A_KIND
-
-        elif check_two_pair(cards):
-            self._ranking = Ranking.TWO_PAIR
-
-        elif check_pair(cards):
-            self._ranking = Ranking.PAIR
-
-        else:
-            self._ranking = Ranking.HIGH_CARD
-
-
-def count_by_ranks(cards):
-    rank_counter = collections.Counter()
-    for card in cards:
-        rank_counter[card.rank] += 1
-    return rank_counter
-
-
-def check_pair(cards):
-    counter = count_by_ranks(cards)
-    for card in cards:
-        if counter[card.rank] == 2:
-            return True
-    return False
-
-
-def check_two_pair(cards):
-    counter_most_common = count_by_ranks(cards).most_common(2)
-    if counter_most_common[1][1] == 2:
-        return True
-    else:
-        return False
-
-
-def check_three_of_a_kind(cards):
-    counter_most_common = count_by_ranks(cards).most_common(1)
-    if counter_most_common[0][1] == 3:
-        return True
-    else:
-        return False
-
-
-def get_sequence_string(cards):
-    # build a string from all ranks
-    cards = list(cards)
-    cards.sort(key=None, reverse=True)
-    cards_seq_string = ''
-    for card in cards:
-        cards_seq_string += card.short()[1:2]
-
-    # remove duplicates
-    cards_seq_string = ''.join(
-        sorted(set(cards_seq_string), key=cards_seq_string.index))
-
-    return cards_seq_string
-
-
-def check_straight(cards):
-    cards_seq_string = get_sequence_string(cards)
-    seq_length = len(cards_seq_string)
-    if seq_length < 5:
-        return False
-
-    # Ace can be high or low!
-    if cards_seq_string[0:1] == 'A':
-        cards_seq_string += 'A'
-        seq_length += 1
-
-    for i in range(5, seq_length + 1):
-        all_ranks = 'AKQJT98765432A'
-        search_string = cards_seq_string[i - 5:i]
-        found = all_ranks.find(search_string)
-        if found != -1:
-            return True
-
-    return False
-
 
 def get_most_common_suit(cards):
-    suit_counter = collections.Counter()
+    cards_per_suit = dict([
+        (Suit.SPADES, []),
+        (Suit.HEARTS, []),
+        (Suit.CLUBS, []),
+        (Suit.DIAMONDS, [])
+    ])
     for card in cards:
-        suit_counter[card.suit] += 1
+        cards_per_suit[card.suit].append(card)
 
-    return suit_counter.most_common(1)[0]
+    for s in cards_per_suit:
+        suited_cards = cards_per_suit[s]
+        print(s)
+        suited_cards_string = ''
+        for card in suited_cards:
+            suited_cards_string = suited_cards_string + card.short()
+        print(suited_cards_string)
 
-
-def check_flush(cards):
-    if len(cards) < 5:
-        return False
-
-    most_suit = get_most_common_suit(cards)
-    if most_suit[1] >= 5:
-        return True
-    else:
-        return False
-
-
-def get_flushcards_from(cards):
-    if len(cards) < 5:
-        return None
-    cards = list(cards)
-    cards.sort(key=None, reverse=True)
-    flushsuit = get_most_common_suit(cards)[0]
-    flushcards = []
-    for card in cards:
-        if card.suit == flushsuit:
-            flushcards.append(card)
-    if len(flushcards) < 5:
-        return None
-    else:
-        return flushcards
-
-
-def check_full_house(cards):
-    counter_most_common = count_by_ranks(cards).most_common(2)
-    if counter_most_common[0][1] == 3 and counter_most_common[1][1] == 2:
-        return True
-    else:
-        return False
-
-
-def check_four_of_a_kind(cards):
-    counter_most_common = count_by_ranks(cards).most_common(1)
-    if counter_most_common[0][1] == 4:
-        return True
-    else:
-        return False
-
-
-def check_straight_flush(cards):
-    if check_flush(cards):
-        flushcards = get_flushcards_from(cards)
-        return check_straight(flushcards)
-    else:
-        return False
-
-
-def check_royal_flush(cards):
-    if check_straight_flush(cards):
-        flushcards = get_flushcards_from(cards)
-        seq_string = get_sequence_string(flushcards)
-        if seq_string.find('AKQJT') != -1:
-            return True
-        else:
-            return False
-    else:
-        return False
 
 
 deck = Deck()
 deck.shuffle()
 
-# for card in deck:
-#    print(card.short() + " " + str(card))
-
-# card1 = deck.deal()
-# card2 = deck.deal()
-# card3 = deck.deal()
-# card4 = deck.deal()
-# card5 = deck.deal()
-# card6 = deck.deal()
-# card7 = deck.deal()
-
-card1 = Card(Rank.ACE, Suit.SPADES)
-card2 = Card(Rank.KING, Suit.SPADES)
-card3 = Card(Rank.QUEEN, Suit.SPADES)
-card4 = Card(Rank.TEN, Suit.SPADES)
-card5 = Card(Rank.JACK, Suit.SPADES)
-card6 = Card(Rank.TWO, Suit.SPADES)
-card7 = Card(Rank.THREE, Suit.SPADES)
-
-# comp_eq = card1 == card2
-# print(card1.short() + " == " + card2.short() + ": " + str(comp_eq))
-
-# comp_ne = card1 != card2
-# print(card1.short() + " != " + card2.short() + ": " + str(comp_ne))
-
-# comp_lt = card1 < card2
-# print(card1.short() + " <  " + card2.short() + ": " + str(comp_lt))
-
-# comp_le = card1 <= card2
-# print(card1.short() + " <= " + card2.short() + ": " + str(comp_le))
-
-# comp_gt = card1 > card2
-# print(card1.short() + " >  " + card2.short() + ": " + str(comp_gt))
-
-# comp_ge = card1 >= card2
-# print(card1.short() + " >= " + card2.short() + ": " + str(comp_ge))
+card1 = deck.deal()
+card2 = deck.deal()
+card3 = deck.deal()
+card4 = deck.deal()
+card5 = deck.deal()
+card6 = deck.deal()
+card7 = deck.deal()
 
 seven_cards = [card1, card2, card3, card4, card5, card6, card7]
 cards_string = ''
@@ -372,11 +203,4 @@ for card in seven_cards:
     cards_string = cards_string + card.short()
 
 print(cards_string)
-print('Pair: ' + str(check_pair(seven_cards)))
-print('Two Pair: ' + str(check_two_pair(seven_cards)))
-print('Three of a Kind: ' + str(check_three_of_a_kind(seven_cards)))
-print('Straight: ' + str(check_straight(seven_cards)))
-print('Flush: ' + str(check_flush(seven_cards)))
-print('Full House: ' + str(check_full_house(seven_cards)))
-print('Straight Flush: ' + str(check_straight_flush(seven_cards)))
-print('Royal Flush: ' + str(check_royal_flush(seven_cards)))
+get_most_common_suit(seven_cards)
