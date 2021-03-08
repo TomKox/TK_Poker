@@ -166,7 +166,7 @@ class Holding:
         cards = self._cards
 
 
-def get_most_common_suit(cards):
+def get_flushcards(cards):
     cards_per_suit = dict([
         (Suit.SPADES, []),
         (Suit.HEARTS, []),
@@ -176,31 +176,46 @@ def get_most_common_suit(cards):
     for card in cards:
         cards_per_suit[card.suit].append(card)
 
+    flush = []
     for s in cards_per_suit:
         suited_cards = cards_per_suit[s]
-        print(s)
-        suited_cards_string = ''
-        for card in suited_cards:
-            suited_cards_string = suited_cards_string + card.short()
-        print(suited_cards_string)
+        
+        # suited_cards_string = ''
+        # for card in suited_cards:
+        #     suited_cards_string = suited_cards_string + card.short()
+        # print(str(s) + ': ' + suited_cards_string)
+        
+        if len(suited_cards) >= 5:
+            flush = suited_cards
 
+    if len(flush) >= 5:
+        return flush
+    else:
+        return None
 
-
-deck = Deck()
-deck.shuffle()
-
-card1 = deck.deal()
-card2 = deck.deal()
-card3 = deck.deal()
-card4 = deck.deal()
-card5 = deck.deal()
-card6 = deck.deal()
-card7 = deck.deal()
-
-seven_cards = [card1, card2, card3, card4, card5, card6, card7]
-cards_string = ''
-for card in seven_cards:
-    cards_string = cards_string + card.short()
-
-print(cards_string)
-get_most_common_suit(seven_cards)
+flush_not_found = True
+while flush_not_found:
+    print('------------------------------------------')
+    deck = Deck()
+    deck.shuffle()
+    
+    card1 = deck.deal()
+    card2 = deck.deal()
+    card3 = deck.deal()
+    card4 = deck.deal()
+    card5 = deck.deal()
+    card6 = deck.deal()
+    card7 = deck.deal()
+    
+    seven_cards = [card1, card2, card3, card4, card5, card6, card7]
+    cards_string = ''
+    for card in seven_cards:
+        cards_string = cards_string + card.short()
+    
+    print(cards_string)
+    
+    flush = get_flushcards(seven_cards)
+    if flush != None:
+        flush_not_found = False
+        for card in flush:
+            print(card)
