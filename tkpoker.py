@@ -153,7 +153,7 @@ class Ranking(Enum):
         return self.value >= other.value
 
     def __str__(self):
-        return self.name.replace('_',' ').title()
+        return str(self.name).replace('_',' ').title()
 
 class Hole_Cards:
     pass
@@ -170,52 +170,73 @@ class Holding:
         hand = get_royal_flush(cards)
         if hand != None:
             self._ranking = Ranking.ROYAL_FLUSH
+            suit = hand[0].suit
+            self._pretty = 'a Royal Flush of ' + str(suit)
 
         else:
             hand = get_straight_flush(cards)
             if hand != None:
                 self._ranking = Ranking.STRAIGHT_FLUSH
+                suit = hand[0].suit
+                self._pretty = 'a Straight Flush of {suit}, {low} to {high}'.format(suit=suit, low=str(hand[0].rank), high=str(hand[4].rank))
 
             else:
                 hand = get_four_of_a_kind(cards)
                 if hand != None:
                     self._ranking = Ranking.FOUR_OF_A_KIND
+                    rank = hand[0].rank
+                    kicker = hand[4].rank
+                    self._pretty = 'Four of a Kind, {rank}s, with a kicker {kicker}'.format(rank=rank, kicker=kicker)
 
                 else:
                     hand = get_full_house(cards)
                     if hand != None:
                         self._ranking = Ranking.FULL_HOUSE
+                        big = hand[0].rank
+                        small = hand[4].rank
+                        self._pretty = 'a Full House, {big}s full of {small}s'.format(big=big, small=small)
 
                     else:
                         hand = get_flush(cards)
                         if hand != None:
                             self._ranking = Ranking.FLUSH
+                            suit = hand[0].suit
+                            self._pretty = 'a Flush of {suit}'
+
                         
                         else:
                             hand = get_straightcards(cards)
                             if hand != None:
                                 self._ranking = Ranking.STRAIGHT
+                                self._pretty = 'a Straight'
                             
                             else:
                                 hand = get_three_of_a_kind(cards)
                                 if hand != None:
                                     self._ranking = Ranking.THREE_OF_A_KIND
+                                    self._pretty = 'Three of a Kind'
 
                                 else:
                                     hand = get_two_pair(cards)
                                     if hand != None:
                                         self._ranking = Ranking.TWO_PAIR
+                                        self._pretty = 'Two Pair'
 
                                     else:
                                         hand = get_pair(cards)
                                         if hand != None:
                                             self._ranking = Ranking.PAIR
+                                            self._pretty = 'a Pair'
 
                                         else:
                                             hand = get_high_card(cards)
                                             self._ranking = Ranking.HIGH_CARD
+                                            self._pretty = 'a High Card'
             
         self._hand = hand    
+
+    def pretty():
+        return self._pretty
 
 
 def get_royal_flush(cards):
