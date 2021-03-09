@@ -20,7 +20,7 @@ class Suit(Enum):
 @unique
 class Rank(Enum):
     ACE = 1
-    TWO = 2
+    DEUCE = 2
     THREE = 3
     FOUR = 4
     FIVE = 5
@@ -161,6 +161,7 @@ class Hole_Cards:
 class Holding:
     def __init__(self, cards):
         self._cards = list(cards)
+        self._pretty = ''
 
     def define(self):
         specifiers = dict()
@@ -201,41 +202,49 @@ class Holding:
                         if hand != None:
                             self._ranking = Ranking.FLUSH
                             suit = hand[0].suit
-                            self._pretty = 'a Flush of {suit}'
-
+                            rank_string = ''
+                            for h in hand:
+                                rank_string = rank_string + str(h.rank) + ', '
+                            rank_string = rank_string.rstrip(', ')
+                            self._pretty = 'a Flush of {suit}, {ranks}'.format(suit=suit, ranks=rank_string)
                         
                         else:
                             hand = get_straightcards(cards)
                             if hand != None:
                                 self._ranking = Ranking.STRAIGHT
-                                self._pretty = 'a Straight'
+                                self._pretty = 'a Straight, {low} to {high}'.format(low=str(hand[0].rank), high=str(hand[4]))
                             
                             else:
                                 hand = get_three_of_a_kind(cards)
                                 if hand != None:
                                     self._ranking = Ranking.THREE_OF_A_KIND
-                                    self._pretty = 'Three of a Kind'
+                                    self._pretty = 'Three of a Kind, {threes}s, with kickers {k1} and {k2}'.format(threes=str(hand[0].rank), k1=str(hand[3].rank), k2=str(hand[4].rank))
 
                                 else:
                                     hand = get_two_pair(cards)
                                     if hand != None:
                                         self._ranking = Ranking.TWO_PAIR
-                                        self._pretty = 'Two Pair'
-
+                                        self._pretty = 'Two Pair, {high}s and {low}s, with a kicker {k}'.format(high=str(hand[0].rank), low=str(hand[2].rank), k=str(hand[4].rank))
+                                    
                                     else:
                                         hand = get_pair(cards)
                                         if hand != None:
                                             self._ranking = Ranking.PAIR
-                                            self._pretty = 'a Pair'
+                                            self._pretty = 'a Pair of {pair}s, with kickers {k1}, {k2} and {k3}'.format(pair=str(hand[0].rank), k1=str(hand[2].rank), k2=str(hand[3].rank), k3=str(hand[4].rank))
 
                                         else:
                                             hand = get_high_card(cards)
                                             self._ranking = Ranking.HIGH_CARD
-                                            self._pretty = 'a High Card'
+                                            hc = str(hand[0].rank)
+                                            k1 = str(hand[1].rank)
+                                            k2 = str(hand[2].rank)
+                                            k3 = str(hand[3].rank)
+                                            k4 = str(hand[4].rank)
+                                            self._pretty = 'a High Card, {hc}, with kickers {k1}, {k2}, {k3} and {k4}'.format(hc=hc, k1=k1, k2=k2, k3=k3, k4=k4)
             
         self._hand = hand    
 
-    def pretty():
+    def pretty(self):
         return self._pretty
 
 
@@ -525,9 +534,10 @@ def get_high_card(cards):
         if len(ranks[r]) == 1:
             hand.append(ranks[r][0])
     
+    hand.sort(key=None,reverse=True)
     if len(hand) >= 5:
         hand = hand[0:5]
-        hand.sort(key=None,reverse=True)
+
         return hand
     else:
         return None
@@ -583,14 +593,14 @@ def get_highest_pair(cards):
     else:
         return None
 
-def print_cards_sorted(cards):
+def get_cards_string(cards):
     cards = list(cards)
     cards.sort()
-    print_string = 'SORTED: '
+    print_string = ''
     for c in cards:
         print_string += c.short()
 
-    print(print_string)
+    return print_string
 
 # TESTCODE HERE:
 i = 0
@@ -649,16 +659,17 @@ while continue_loop:
     i = i + 1
     if i == 100000:
          continue_loop = False
- 
-print('RESULTS:')
+
+print('')
+print('RESULTS')
 for r in results:
     ranking_name = str(r)
     ranking_count = str(len(results[r]))
     print(ranking_name + ': ' + ranking_count)
 
-print('--------------------------------------')
+print('')
 for r in results:
-    print(str(r).capitalize())
+    print(str(r).upper())
     
     if len(results[r]) < 10:
         max = len(results[r])
@@ -666,6 +677,12 @@ for r in results:
         max = 10
 
     for i in range(0, max):
-        print_cards_sorted(results[r][i])
+        results_cards = results[r][i]
+        line = get_cards_string(results_cards)
+        line += ' - '
+        hld = Holding(results_cards)
+        hld.define()
+        line += hld.pretty()
+        print(line)
 
-    print('--------------------------------------')
+    print('')
