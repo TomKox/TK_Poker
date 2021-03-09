@@ -223,7 +223,7 @@ def get_royal_flush(cards):
     royal_flush = get_straight_flush(cards)
     if royal_flush != None:
         royal_flush.sort()
-        if royal_flush[-1].rank == Rank.ACE:
+        if royal_flush[-1].rank == Rank.ACE and royal_flush[-5].rank == Rank.TEN:
             royal_flush.reverse()
             return royal_flush
         else:
@@ -629,8 +629,22 @@ while continue_loop:
     if i == 100000:
          continue_loop = False
  
-
+print('RESULTS:')
 for r in results:
     ranking_name = str(r)
     ranking_count = str(len(results[r]))
     print(ranking_name + ': ' + ranking_count)
+
+print('--------------------------------------')
+for r in results:
+    print(str(r).capitalize())
+    
+    if len(results[r]) < 10:
+        max = len(results[r])
+    else:
+        max = 10
+
+    for i in range(0, max):
+        print_cards_sorted(results[r][i])
+
+    print('--------------------------------------')
