@@ -165,7 +165,89 @@ class Holding:
     def define(self):
         specifiers = dict()
 
-        cards = self._cards
+        cards = list(self._cards)
+
+        hand = get_royal_flush(cards)
+        if hand != None:
+            self._ranking = Ranking.ROYAL_FLUSH
+
+        else:
+            hand = get_straight_flush(cards)
+            if hand != None:
+                self._ranking = Ranking.STRAIGHT_FLUSH
+
+            else:
+                hand = get_four_of_a_kind(cards)
+                if hand != None:
+                    self._ranking = Ranking.FOUR_OF_A_KIND
+
+                else:
+                    hand = get_full_house(cards)
+                    if hand != None:
+                        self._ranking = Ranking.FULL_HOUSE
+
+                    else:
+                        hand = get_flush(cards)
+                        if hand != None:
+                            self._ranking = Ranking.FLUSH
+                        
+                        else:
+                            hand = get_straightcards(cards)
+                            if hand != None:
+                                self._ranking = Ranking.STRAIGHT
+                            
+                            else:
+                                hand = get_three_of_a_kind(cards)
+                                if hand != None:
+                                    self._ranking = Ranking.THREE_OF_A_KIND
+
+                                else:
+                                    hand = get_two_pair(cards)
+                                    if hand != None:
+                                        self._ranking = Ranking.TWO_PAIR
+
+                                    else:
+                                        hand = get_pair(cards)
+                                        if hand != None:
+                                            self._ranking = Ranking.PAIR
+
+                                        else:
+                                            hand = get_high_card(cards)
+                                            self._ranking = Ranking.HIGH_CARD
+            
+        self._hand = hand    
+
+
+def get_royal_flush(cards):
+    cards = list(cards)
+    royal_flush = get_straight_flush(cards)
+    if royal_flush != None:
+        royal_flush.sort()
+        if royal_flush[-1].rank == Rank.ACE:
+            royal_flush.reverse()
+            return royal_flush
+        else:
+            return None
+    else:
+        return None
+
+
+def get_straight_flush(cards):
+    cards = list(cards)
+    flushcards = get_flushcards(cards)
+    straight_flush = get_straightcards(flushcards)
+    return straight_flush
+
+
+def get_flush(cards):
+    cards = list(cards)
+    flush = get_flushcards(cards)
+    if flush != None:
+        flush.sort(key=None, reverse=True)
+        flush = flush[0:5]
+        return flush
+    else:
+        return None
 
 
 # get all the cards of the same suit, if there are 5 or more
@@ -194,6 +276,10 @@ def get_flushcards(cards):
 # get the highest straight out of the cards, or None if there is no straight
 def get_straightcards(cards):
     straight = []
+
+    if cards is None:
+        return None
+
     cards = list(cards)
     ranks = get_by_rank(cards)
     
@@ -272,8 +358,33 @@ def get_four_of_a_kind(cards):
     else:
         return None
 
+# get a full house from cards, or None if not full house.
 def get_full_house(cards):
-    pass
+    cards = list(cards)
+    tripple = get_three_of_a_kind(cards)
+    if tripple != None:
+
+        # special check: if it is already a full house!  
+        # See also, exceptional case in get_three_of_a_kind()
+        if tripple[-1] == tripple[-2]:
+            return tripple
+        else:
+            del tripple[-1]
+            del tripple[-1]
+    else:
+        return None
+
+    pair = get_highest_pair(cards)
+    full_house = []
+    if pair != None:
+        for card in tripple:
+            full_house.append(card)
+        for card in pair:
+            full_house.append(card)
+        return full_house
+    else:
+        return None
+
 
 # get Three of a Kind, plus kickers.
 # Warning: If you want to assume kickers are correct, make sure that input cards are not Full House!!!
@@ -282,15 +393,19 @@ def get_three_of_a_kind(cards):
     ranks = get_by_rank(cards)
 
     best = []
+    second_best = []
     kickers = []
 
     for r in ranks:
         if len(ranks[r]) == 3:
             if len(best) == 0:
                 best = ranks[r]
-            else:
-                if ranks[r][0].rank > best[0].rank:
+            elif len(best) == 3:
+                if ranks[r][0] > best[0]:
+                    second_best = best
                     best = ranks[r]
+                else:
+                    second_best = ranks[r]
         
         if len(ranks[r]) == 1:
             kickers.append(ranks[r][0])
@@ -299,6 +414,20 @@ def get_three_of_a_kind(cards):
     if len(kickers) >= 2:
         best.append(kickers[-1])
         best.append(kickers[-2])
+    elif len(best) == 3:
+        # THIS SHOULD ONLY HAPPEN WHEN THERE ARE 2 SETS OF THREE CARDS (So, a full house)
+        # OR TWO POSSIBLE FULL HOUSES (3 + 2HIGH) (3 + 2LOW)
+        if len(second_best) == 3:
+            best.append(second_best[0])
+            best.append(second_best[1])
+            return best
+        else:
+            for card in best:
+                cards.remove(card)
+            pair = get_highest_pair(cards)
+            best.append(pair[0])
+            best.append(pair[1])
+            return best
     else:
         return None
 
@@ -308,18 +437,88 @@ def get_three_of_a_kind(cards):
         return None
 
 def get_two_pair(cards):
-    pass
+    cards = list(cards)
+    high_pair = get_highest_pair(cards)
 
+    if high_pair != None:
+        for c in high_pair:
+            cards.remove(c)
+    else:
+        return None
+
+    low_pair = get_highest_pair(cards)
+    if low_pair != None:
+        for c in low_pair:
+            cards.remove(c)
+    else:
+        return None
+
+    kickers = []
+    ranks = get_by_rank(cards)
+    for r in ranks:
+        if len(ranks[r]) == 1:
+            kickers.append(ranks[r][0])
+
+    hand = []
+    if len(kickers) != 0:
+        kickers.sort()
+        hand.append(high_pair[0])
+        hand.append(high_pair[1])
+        hand.append(low_pair[0])
+        hand.append(low_pair[1])
+        hand.append(kickers[-1])
+        return hand
+    else:
+        return None
+
+
+# get the pair and 3 kickers from the cards.
+# Warning: Assume it is known the cards are not two pair.
 def get_pair(cards):
-    pass
+    cards = list(cards)
+    pair = get_highest_pair(cards)
+     
+    kickers = []
+    if pair != None:
+        cards.remove(pair[0])
+        cards.remove(pair[1])
+        ranks = get_by_rank(cards)
+        for r in ranks:
+            if len(ranks[r]) == 1:
+                kickers.append(ranks[r][0])
+        if len(kickers) >= 3:
+            kickers.sort(key=None, reverse=True)
+            pair.append(kickers[0])
+            pair.append(kickers[1])
+            pair.append(kickers[2])
+            return pair
+        else:
+            return None
 
 def get_high_card(cards):
-    pass
+    cards = list(cards)
+    ranks = get_by_rank(cards)
+    hand = []
+    
+    for r in ranks:
+        if len(ranks[r]) == 1:
+            hand.append(ranks[r][0])
+    
+    if len(hand) >= 5:
+        hand = hand[0:5]
+        hand.sort(key=None,reverse=True)
+        return hand
+    else:
+        return None
 
 
 # returns a dictionary with Rank as Key, and a list of all cards of that Rank as Value
 def get_by_rank(cards):
-    cards = list(cards)
+    try:
+        cards = list(cards)
+    except:
+        cards = [cards]
+
     cards.sort()
     ranks = dict()
 
@@ -339,10 +538,50 @@ def get_by_rank(cards):
     return ranks
 
 
+# get the highest pair from the cards
+def get_highest_pair(cards):
+
+    try:
+        cards = list(cards)
+    except:
+        pass
+
+    ranks = get_by_rank(cards)
+    best = []
+
+    for r in ranks:
+        if len(ranks[r]) == 2:
+            if len(best) == 0:
+                best = ranks[r]
+            else:
+                if ranks[r][0] > best[0]:
+                    best = ranks[r]
+        
+    if len(best) == 2:
+        return best
+    else:
+        return None
+
+def print_cards_sorted(cards):
+    cards = list(cards)
+    cards.sort()
+    print_string = 'SORTED: '
+    for c in cards:
+        print_string += c.short()
+
+    print(print_string)
+
 # TESTCODE HERE:
+i = 0
 continue_loop = True
+
+results = dict()
+
+for rnk in Ranking:
+    results[str(rnk)] = []
+
 while continue_loop:
-    print('------------------------------------------')
+    # print('------------------------------------------')
     deck = Deck()
     deck.shuffle()
     
@@ -355,51 +594,43 @@ while continue_loop:
     card7 = deck.deal()
 
     # card1 = Card(Rank.ACE, Suit.SPADES)
-    # card2 = Card(Rank.QUEEN, Suit.SPADES)
-    # card3 = Card(Rank.KING, Suit.DIAMONDS)
-    # card4 = Card(Rank.TEN, Suit.CLUBS)
-    # card5 = Card(Rank.JACK, Suit.SPADES)
-    # card6 = Card(Rank.FIVE, Suit.HEARTS)
-    # card7 = Card(Rank.ACE, Suit.HEARTS)
-
-    # card1 = Card(Rank.NINE, Suit.SPADES)
-    # card2 = Card(Rank.FOUR, Suit.SPADES)
-    # card3 = Card(Rank.NINE, Suit.HEARTS)
-    # card4 = Card(Rank.THREE, Suit.CLUBS)
-    # card5 = Card(Rank.NINE, Suit.DIAMONDS)
-    # card6 = Card(Rank.NINE, Suit.CLUBS)
-    # card7 = Card(Rank.QUEEN, Suit.HEARTS)
-    
+    # card2 = Card(Rank.KING, Suit.SPADES)
+    # card3 = Card(Rank.QUEEN, Suit.SPADES)
+    # card4 = Card(Rank.JACK, Suit.SPADES)
+    # card5 = Card(Rank.TEN, Suit.SPADES)
+    # card6 = Card(Rank.NINE, Suit.SPADES)
+    # card7 = Card(Rank.EIGHT, Suit.SPADES)
+   
     seven_cards = [card1, card2, card3, card4, card5, card6, card7]
     cards_string = ''
     for card in seven_cards:
         cards_string = cards_string + card.short()
     
-    print(cards_string)
-    
-    # flush = get_flushcards(seven_cards)
-    # if flush != None:
-    #     continue_loop = False
-    #     for card in flush:
-    #         # print(card)
-    #         pass
+    # print(cards_string)
 
-    # s = get_straightcards(seven_cards)
-    # if s != None:
-    #     continue_loop = False
-    #     for card in s:
-    #         print(card)
+    holding = Holding(seven_cards)
+    try:
+        holding.define()
+    except:
+        print('Define failed for cards:')
+        print(cards_string)
 
-    # foak = get_four_of_a_kind(seven_cards)
-    # if foak != None:
-    #     for card in foak:
-    #         print(card)
-    #         continue_loop = False
+    hr = str(holding._ranking)
 
-    toak = get_three_of_a_kind(seven_cards)
-    if toak != None:
-        for card in toak:
-            print(card)
-            continue_loop = False
+    results[hr].append(seven_cards)
+    # hand_spec = str(holding._ranking) + ": "
+    # for card in holding._hand:
+    #     hand_spec += card.short()
+    # print(hand_spec)
 
-    
+    # continue_loop = False
+
+    i = i + 1
+    if i == 100000:
+         continue_loop = False
+ 
+
+for r in results:
+    ranking_name = str(r)
+    ranking_count = str(len(results[r]))
+    print(ranking_name + ': ' + ranking_count)
