@@ -156,7 +156,37 @@ class Ranking(Enum):
         return str(self.name).replace('_',' ').title()
 
 class Hole_Cards:
-    pass
+    def __init__(self, cards):
+        self._cards = list(cards)
+
+        self._cards.sort(reverse=True)
+
+    def generic(self):
+        c1 = self._cards[0].short()[1]
+        c2 = self._cards[1].short()[1]
+        if self._cards[0].suit == self._cards[1].suit:
+            suited = True
+        else:
+            suited = False
+        if self._cards[0].rank == self._cards[1].rank:
+            pair = True
+        else:
+            pair = False
+
+        generic_string = '[' + c1 + c2
+
+        if pair:
+            generic_string += ']'
+            return generic_string
+        else:
+            if suited:
+                generic_string += 's]'
+            else:
+                generic_string += 'o]'
+            return generic_string
+
+
+
 
 class Holding:
     def __init__(self, cards):
@@ -656,7 +686,9 @@ def get_cards_string(cards):
     return print_string
 
 # TESTCODE HERE:
+hc_results = dict()
 for runs in range(0,100):
+
     deck = Deck()
     deck.shuffle()
 
@@ -676,10 +708,10 @@ for runs in range(0,100):
     hole1 = player1[0].short() + player1[1].short()
     hole2 = player2[0].short() + player2[1].short()
 
-    board_short = get_cards_string(board)
+    p1_hole = Hole_Cards(player1)
+    p2_hole = Hole_Cards(player2)
 
-    print('')
-    print('P1:{}     {}     P2:{}'.format(hole1, board_short, hole2))
+    board_short = get_cards_string(board)
 
     for card in board:
         player1.append(card)
@@ -690,6 +722,11 @@ for runs in range(0,100):
 
     holding1.define()
     holding2.define()
+
+    print('')
+    print('P1:{}     {}     P2:{}'.format(hole1, board_short, hole2))
+    print('P1:' + p1_hole.generic()+'                                 P2:' + p2_hole.generic())
+    print()
 
     print('')
     print('P1: ' + holding1.pretty())
@@ -712,3 +749,19 @@ for runs in range(0,100):
     print(p1_short)
     print(p2_short)
     print('')
+
+    if holding1 > holding2:
+        if p1_hole.generic() in hc_results:
+            hc_results[p1_hole.generic()] += 1
+        else:
+            hc_results[p1_hole.generic()] = 0
+
+    if holding1 < holding2:
+        if p2_hole.generic() in hc_results:
+            hc_results[p2_hole.generic()] += 1
+        else:
+            hc_results[p2_hole.generic()] = 0
+
+# for hc in hc_results:
+#     if hc_results[hc] > 0:
+#         print(hc + ': ' + str(hc_results[hc]))
