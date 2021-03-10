@@ -212,7 +212,7 @@ class Holding:
                             hand = get_straightcards(cards)
                             if hand != None:
                                 self._ranking = Ranking.STRAIGHT
-                                self._pretty = 'a Straight, {low} to {high}'.format(low=str(hand[0].rank), high=str(hand[4]))
+                                self._pretty = 'a Straight, {low} to {high}'.format(low=str(hand[0].rank), high=str(hand[4].rank))
                             
                             else:
                                 hand = get_three_of_a_kind(cards)
@@ -246,6 +246,59 @@ class Holding:
 
     def pretty(self):
         return self._pretty
+
+    # self == other
+    def __eq__(self, other):
+        if self._ranking != other._ranking:
+            return False
+        else:
+            for i in range(0,5):
+                if self._hand[i] != other._hand[i]:
+                    return False
+            
+            return True
+    
+    # self != other
+    def __ne__(self, other):
+        if self._ranking != other._ranking:
+            return True
+        else:
+            for i in range(0,5):
+                if self._hand[i] != other._hand[i]:
+                    return True
+
+            return False
+
+    # self < other
+    def __lt__(self, other):
+        if self._ranking < other._ranking:
+            return True
+        elif self._ranking > other._ranking:
+            return False
+        else:
+            for i in range(0,5):
+                if self._hand[i] < other._hand[i]:
+                    return True
+                if self._hand[i] > other._hand[i]:
+                    return False
+            
+            return False
+
+    # self > other
+    def __gt__(self, other):
+        if self._ranking > other._ranking:
+            return True
+        elif self._ranking < other._ranking:
+            return False
+        else:
+            for i in range(0,5):
+                if self._hand[i] > other._hand[i]:
+                    return True
+                if self._hand[i] < other._hand[i]:
+                    return False
+
+            return False
+
 
 
 def get_royal_flush(cards):
@@ -603,86 +656,59 @@ def get_cards_string(cards):
     return print_string
 
 # TESTCODE HERE:
-i = 0
-continue_loop = True
-
-results = dict()
-
-for rnk in Ranking:
-    results[str(rnk)] = []
-
-while continue_loop:
-    # print('------------------------------------------')
+for runs in range(0,100):
     deck = Deck()
     deck.shuffle()
-    
-    card1 = deck.deal()
-    card2 = deck.deal()
-    card3 = deck.deal()
-    card4 = deck.deal()
-    card5 = deck.deal()
-    card6 = deck.deal()
-    card7 = deck.deal()
 
-    # card1 = Card(Rank.ACE, Suit.SPADES)
-    # card2 = Card(Rank.KING, Suit.SPADES)
-    # card3 = Card(Rank.QUEEN, Suit.SPADES)
-    # card4 = Card(Rank.JACK, Suit.SPADES)
-    # card5 = Card(Rank.TEN, Suit.SPADES)
-    # card6 = Card(Rank.NINE, Suit.SPADES)
-    # card7 = Card(Rank.EIGHT, Suit.SPADES)
-   
-    seven_cards = [card1, card2, card3, card4, card5, card6, card7]
-    cards_string = ''
-    for card in seven_cards:
-        cards_string = cards_string + card.short()
-    
-    # print(cards_string)
+    player1 = []
+    player2 = []
+    board = []
 
-    holding = Holding(seven_cards)
-    try:
-        holding.define()
-    except:
-        print('Define failed for cards:')
-        print(cards_string)
+    for i in range(0,2):
+        player1.append(deck.deal())
 
-    hr = str(holding._ranking)
+    for i in range(0,2):
+        player2.append(deck.deal())
 
-    results[hr].append(seven_cards)
-    # hand_spec = str(holding._ranking) + ": "
-    # for card in holding._hand:
-    #     hand_spec += card.short()
-    # print(hand_spec)
+    for i in range(0,5):
+        board.append(deck.deal())
 
-    # continue_loop = False
+    hole1 = player1[0].short() + player1[1].short()
+    hole2 = player2[0].short() + player2[1].short()
 
-    i = i + 1
-    if i == 100000:
-         continue_loop = False
+    board_short = get_cards_string(board)
 
-print('')
-print('RESULTS')
-for r in results:
-    ranking_name = str(r)
-    ranking_count = str(len(results[r]))
-    print(ranking_name + ': ' + ranking_count)
+    print('')
+    print('P1:{}     {}     P2:{}'.format(hole1, board_short, hole2))
 
-print('')
-for r in results:
-    print(str(r).upper())
-    
-    if len(results[r]) < 10:
-        max = len(results[r])
-    else:
-        max = 10
+    for card in board:
+        player1.append(card)
+        player2.append(card)
 
-    for i in range(0, max):
-        results_cards = results[r][i]
-        line = get_cards_string(results_cards)
-        line += ' - '
-        hld = Holding(results_cards)
-        hld.define()
-        line += hld.pretty()
-        print(line)
+    holding1 = Holding(player1)
+    holding2 = Holding(player2)
 
+    holding1.define()
+    holding2.define()
+
+    print('')
+    print('P1: ' + holding1.pretty())
+    print('P2: ' + holding2.pretty())
+
+    print('P1 < P2 (P2 WINS): ' + str(holding1 < holding2))
+    print('P1 > P2 (P1 WINS): ' + str(holding1 > holding2))
+    print('P1 == P2 (SPLIT) : ' + str(holding1 == holding2))
+    print('P1 != P2         : ' + str(holding1 != holding2))
+    print('')
+    p1_short = 'P1: '
+    p2_short = 'P2: '
+
+    for card in holding1._hand:
+        p1_short += card.short()
+
+    for card in holding2._hand:
+        p2_short += card.short()    
+
+    print(p1_short)
+    print(p2_short)
     print('')
