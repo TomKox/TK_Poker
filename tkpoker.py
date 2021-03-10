@@ -194,8 +194,6 @@ class Holding:
         self._pretty = ''
 
     def define(self):
-        specifiers = dict()
-
         cards = list(self._cards)
 
         hand = get_royal_flush(cards)
