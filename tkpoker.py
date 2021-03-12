@@ -240,7 +240,7 @@ class Holding:
                             hand = get_straightcards(cards)
                             if hand != None:
                                 self._ranking = Ranking.STRAIGHT
-                                self._pretty = 'a Straight, {low} to {high}'.format(low=str(hand[0].rank), high=str(hand[4].rank))
+                                self._pretty = 'a Straight, {low} to {high}'.format(low=str(hand[4].rank), high=str(hand[0].rank))
                             
                             else:
                                 hand = get_three_of_a_kind(cards)
@@ -270,7 +270,8 @@ class Holding:
                                             k4 = str(hand[4].rank)
                                             self._pretty = 'a High Card, {hc}, with kickers {k1}, {k2}, {k3} and {k4}'.format(hc=hc, k1=k1, k2=k2, k3=k3, k4=k4)
             
-        self._hand = hand    
+        self._hand = hand
+        self._pretty = self._pretty.replace('Sixs', 'Sixes')    
 
     def pretty(self):
         return self._pretty
