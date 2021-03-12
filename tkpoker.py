@@ -675,9 +675,10 @@ def get_highest_pair(cards):
     else:
         return None
 
-def get_cards_string(cards):
+def get_cards_string(cards, sorted=False):
     cards = list(cards)
-    cards.sort()
+    if sorted:
+        cards.sort()
     print_string = ''
     for c in cards:
         print_string += c.short()
