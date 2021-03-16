@@ -199,66 +199,80 @@ class Holding:
         hand = get_royal_flush(cards)
         if hand != None:
             self._ranking = Ranking.ROYAL_FLUSH
-            suit = hand[0].suit
-            self._pretty = 'a Royal Flush of ' + str(suit)
+            suit = str(hand[0].suit)
+            self._pretty = f'a Royal Flush of {suit}'
 
         else:
             hand = get_straight_flush(cards)
             if hand != None:
                 self._ranking = Ranking.STRAIGHT_FLUSH
-                suit = hand[0].suit
-                self._pretty = 'a Straight Flush of {suit}, {low} to {high}'.format(suit=suit, low=str(hand[0].rank), high=str(hand[4].rank))
-
+                suit = str(hand[0].suit)
+                low=str(hand[0].rank)
+                high=str(hand[4].rank)
+                self._pretty = f'a Straight Flush of {suit}, {low} to {high}'
+                
             else:
                 hand = get_four_of_a_kind(cards)
                 if hand != None:
                     self._ranking = Ranking.FOUR_OF_A_KIND
-                    rank = hand[0].rank
-                    kicker = hand[4].rank
-                    self._pretty = 'Four of a Kind, {rank}s, with a kicker {kicker}'.format(rank=rank, kicker=kicker)
+                    rank = str(hand[0].rank)
+                    kicker = str(hand[4].rank)
+                    self._pretty = f'Four of a Kind, {rank}s, with a kicker {kicker}'
 
                 else:
                     hand = get_full_house(cards)
                     if hand != None:
                         self._ranking = Ranking.FULL_HOUSE
-                        big = hand[0].rank
-                        small = hand[4].rank
-                        self._pretty = 'a Full House, {big}s full of {small}s'.format(big=big, small=small)
+                        big = str(hand[0].rank)
+                        small = str(hand[4].rank)
+                        self._pretty = f'a Full House, {big}s full of {small}s'
 
                     else:
                         hand = get_flush(cards)
                         if hand != None:
                             self._ranking = Ranking.FLUSH
-                            suit = hand[0].suit
+                            suit = str(hand[0].suit)
                             rank_string = ''
                             for h in hand:
                                 rank_string = rank_string + str(h.rank) + ', '
                             rank_string = rank_string.rstrip(', ')
-                            self._pretty = 'a Flush of {suit}, {ranks}'.format(suit=suit, ranks=rank_string)
+                            self._pretty = f'a Flush of {suit}, {rank_string}'
                         
                         else:
                             hand = get_straightcards(cards)
                             if hand != None:
                                 self._ranking = Ranking.STRAIGHT
-                                self._pretty = 'a Straight, {low} to {high}'.format(low=str(hand[4].rank), high=str(hand[0].rank))
+                                low=str(hand[4].rank)
+                                high=str(hand[0].rank)
+                                self._pretty = f'a Straight, {low} to {high}'
                             
                             else:
                                 hand = get_three_of_a_kind(cards)
                                 if hand != None:
                                     self._ranking = Ranking.THREE_OF_A_KIND
-                                    self._pretty = 'Three of a Kind, {threes}s, with kickers {k1} and {k2}'.format(threes=str(hand[0].rank), k1=str(hand[3].rank), k2=str(hand[4].rank))
-
+                                    threes=str(hand[0].rank)
+                                    k1=str(hand[3].rank)
+                                    k2=str(hand[4].rank)
+                                    self._pretty = f'Three of a Kind, {threes}s, with kickers {k1} and {k2}'
+                                    
                                 else:
                                     hand = get_two_pair(cards)
                                     if hand != None:
                                         self._ranking = Ranking.TWO_PAIR
-                                        self._pretty = 'Two Pair, {high}s and {low}s, with a kicker {k}'.format(high=str(hand[0].rank), low=str(hand[2].rank), k=str(hand[4].rank))
+                                        high=str(hand[0].rank)
+                                        low=str(hand[2].rank)
+                                        kicker=str(hand[4].rank)
+                                        self._pretty = f'Two Pair, {high}s and {low}s, with a kicker {kicker}'
                                     
                                     else:
                                         hand = get_pair(cards)
                                         if hand != None:
                                             self._ranking = Ranking.PAIR
-                                            self._pretty = 'a Pair of {pair}s, with kickers {k1}, {k2} and {k3}'.format(pair=str(hand[0].rank), k1=str(hand[2].rank), k2=str(hand[3].rank), k3=str(hand[4].rank))
+                                            pair=str(hand[0].rank)
+                                            k1=str(hand[2].rank)
+                                            k2=str(hand[3].rank)
+                                            k3=str(hand[4].rank)
+                                            self._pretty = f'a Pair of {pair}s, with kickers {k1}, {k2} and {k3}'
 
                                         else:
                                             hand = get_high_card(cards)
@@ -268,7 +282,7 @@ class Holding:
                                             k2 = str(hand[2].rank)
                                             k3 = str(hand[3].rank)
                                             k4 = str(hand[4].rank)
-                                            self._pretty = 'a High Card, {hc}, with kickers {k1}, {k2}, {k3} and {k4}'.format(hc=hc, k1=k1, k2=k2, k3=k3, k4=k4)
+                                            self._pretty = f'a High Card, {hc}, with kickers {k1}, {k2}, {k3} and {k4}'
             
         self._hand = hand
         self._pretty = self._pretty.replace('Sixs', 'Sixes')    
