@@ -447,9 +447,7 @@ def get_straightcards(cards):
 
     n = len(uniques)
     for i in range(n-1, 3, -1):
-        # print('checking ' + uniques[i].short())
         if uniques[i].rank.value - uniques[i-4].rank.value == 4:
-            # print('straight found')
             straight.append(uniques[i])
             straight.append(uniques[i-1])
             straight.append(uniques[i-2])
