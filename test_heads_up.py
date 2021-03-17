@@ -25,7 +25,7 @@ for runs in range(0,100):
     p1_hole = pkr.Hole_Cards(player1)
     p2_hole = pkr.Hole_Cards(player2)
 
-    board_short = get_cards_string(board)
+    board_short = pkr.get_cards_string(board)
 
     for card in board:
         player1.append(card)
