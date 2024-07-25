@@ -1,7 +1,7 @@
 import tkpoker as pkr
 
-hc_results = dict()
-for runs in range(0,100):
+win_counter = dict()
+for runs in range(0,1000000):
 
     deck = pkr.Deck()
     deck.shuffle()
@@ -64,14 +64,21 @@ for runs in range(0,100):
     print(p2_short)
     print('')
 
+    win = None
     if holding1 > holding2:
-        if p1_hole.generic() in hc_results:
-            hc_results[p1_hole.generic()] += 1
-        else:
-            hc_results[p1_hole.generic()] = 0
+        win = p1_hole.generic()
+    if holding2 > holding1:
+        win = p2_hole.generic()
 
-    if holding1 < holding2:
-        if p2_hole.generic() in hc_results:
-            hc_results[p2_hole.generic()] += 1
-        else:
-            hc_results[p2_hole.generic()] = 0
+    if win not in win_counter.keys():
+        win_counter[win] = 0
+
+    win_counter[win] += 1
+
+sorted_wins = dict(sorted(win_counter.items(), key=lambda item: item[1], reverse=True))
+
+for combo, count in sorted_wins.items():
+    print(f"{combo} - {count}")
+
+    
+    
