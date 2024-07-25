@@ -1,7 +1,7 @@
 import tkpoker as pkr
 
 win_counter = dict()
-for runs in range(0,1000000):
+for runs in range(0,1):
 
     deck = pkr.Deck()
     deck.shuffle()
@@ -75,9 +75,9 @@ for runs in range(0,1000000):
 
     win_counter[win] += 1
 
-sorted_wins = dict(sorted(win_counter.items(), key=lambda item: item[1], reverse=True))
+sorted_wins = list(sorted(win_counter.items(), key=lambda item: item[1], reverse=True))
 
-for combo, count in sorted_wins.items():
+for combo, count in sorted_wins:
     print(f"{combo} - {count}")
 
     
